@@ -9,14 +9,28 @@
             if ($result != ''){
                 $result .= ' ';
             }
-                       
-            // is there an imperative verb ?
-            
-            // is it a composed sentence ?
-            
-            // else, it is a standard sentence
-            
-            $result .= convertSVO($sentence);
+                  
+            // use the appropriate method to treat the sentence
+            // depending of its type
+            $sentenceType = getSentenceType($sentence);
+            switch ($sentenceType){
+                // Composed
+                case 'C':
+                    $result .= convertComposed($sentence);
+                    break;
+                // Imperative
+                case 'I':
+                    $result .= convertImperative($sentence);
+                    break;
+                // 'Standard'
+                case 'S':
+                    $result .= convertSVO($sentence);
+                    break;
+                // What might not be defined, thus making it not applicable
+                default:
+                    $result .= convertSVO($sentence);
+                    break;
+            }       
         }
       
         return $result;
@@ -36,27 +50,44 @@
     // C : Composed
     // I : Imperative
     // S : Standard
+    // NA : Not applicable
     function getSentenceType($elements){
         $typeDetermined = false;   
         
-        
-        // loop once to check if it is composed
         $csFound = false;
         $nbVerbs = 0;
+        $imperativeFound = false;
+        
+        // loop into the sentence to determinate it's type
         foreach ($elements as $element){
             $pos = $element->getPos();
+            
+            // spot conjonction to look for composed sentence
             if ($pos == 'CS'){
                 $csFound = true;
             }
-            elseif ($pos == 'V' and ($csFound xor $nbVerbs == 0)){
+            // count verbs in each side of the conjonction
+            elseif (($pos == 'V') and ($csFound xor ($nbVerbs == 0))){
                 $nbVerbs ++;
             }
+            // check if there's an imperative verb
+            elseif ($pos == 'VIMP') {
+                $imperativeFound = true;
+            }
+                     
         }
         
-        if ($csFound and $nbVerbs > 2){
-            
+        // if a conjonction (qui, que dont, etc) is found
+        // and each side has a verb, then it's a composed sentence
+        if ($csFound and $nbVerbs >= 2){
+            return 'C';
         }
-        
+        elseif ($imperativeFound){
+            return 'I';
+        }
+        else{
+            return 'S';
+        }              
     }
      
     // Subject + Verb + Object
@@ -88,7 +119,7 @@
                 // We move put it at the start with it's pronoun
                 $index = $element->getIndex();
                 $prevPos = $elements[$index - 1]->getPos();
-                if ($prevPos == 'CLS' || $prevPos == 'CLO'){
+                if ($prevPos == 'CLS' or $prevPos == 'CLO'){
                     $start[] = $element;
                 }
                 // or we put it at the beginning of the "end" array
@@ -101,7 +132,7 @@
                 
             }
             // put the rest in the "start" array
-            elseif($pos != 'PUNC' && $verbFound ){
+            elseif($pos != 'PUNC' and $verbFound ){
                 $start[] = $element;
             }
             
@@ -165,8 +196,94 @@
         return $sentence;
     }
     
-    // Subordinate clause, separated by "que, qui, dont"
-    function convertSubordinate($elements){
+    function convertImperative($elements){
+        if ($elements == null){
+            return '';
+        }
+        
+        $start = array();
+        $imperativeVerb = '';
+        
+        // Sort elements
+        foreach ($elements as $element){
+            $pos = $element->getPos();
+            $word = $element->getWord();
+            
+            if ($pos == 'VIMP' and $imperativeVerb == ''){
+                $imperativeVerb = $word;
+            }
+            elseif ($pos != 'PUNC') {
+                $start[] = $element;
+            }
+        }
+
+        // Reform sentence
+        $sentence = '';
+             
+        // Put the start
+        foreach ($start as $element){
+            if ($sentence != ''){
+                // Put spaces between words
+                $sentence .= ' ';
+                $sentence .= $element->getWord();
+            }
+            // First word
+            else{
+                // Change first letter to uppercase
+                // Supports accents
+                $sentence .= mb_substr(
+                        mb_strtoupper($element->getWord()),0,1,'UTF-8')
+                    . mb_substr($element->getWord(), 1);
+            }          
+        }
+        // Separate the start and the imperative with a comma   
+        $sentence .= ', '; 
+        
+        // Put the imperative
+        $sentence .= mb_strtolower($imperativeVerb);
+            
+        // Put the correct punct. at the end
+        if ($elements[count($elements)-1]->getPos() == 'PUNC'){
+            $sentence .= $elements[count($elements)-1]->getWord();
+        }
+        // put a '.' if there is no punct in the original sentence
+        else{
+            $sentence .= '.';
+        }
+        return $sentence;
+    }
     
+    function convertComposed($elements){
+        if ($elements == null){
+            return '';
+        }
+        
+        // We need to split the composed sentence into 2 differents
+        // and treat them separetely
+        $firstSentence = array();
+        $secondSentence = array();
+        
+        $splitterFound = false;
+        
+        foreach ($elements as $element){
+            $pos = $element->getPos();
+            if (!$splitterFound){
+                $firstSentence[] = $element;
+            }
+            else{
+                $secondSentence[] = $element;
+            }
+            
+            if ($pos == 'CS'){
+                $splitterFound = true;
+            }
+        }
+        
+        $fullSentence = '';
+        
+        $fullSentence .= ConvertSVO($firstSentence);
+        $fullSentence .= ConvertSVO($secondSentence);
+        
+        return $fullSentence;
     }
 ?>
