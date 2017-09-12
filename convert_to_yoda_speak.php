@@ -15,15 +15,15 @@
             $sentenceType = getSentenceType($sentence);
             switch ($sentenceType){
                 // Composed
-                case 'C':
+                case 'Composed':
                     $result .= convertComposed($sentence);
                     break;
                 // Imperative
-                case 'I':
+                case 'Imperative':
                     $result .= convertImperative($sentence);
                     break;
                 // 'Standard'
-                case 'S':
+                case 'SVO':
                     $result .= convertSVO($sentence);
                     break;
                 // What might not be defined, thus making it not applicable
@@ -47,13 +47,7 @@
         return $sentences;
     }
     
-    // C : Composed
-    // I : Imperative
-    // S : Standard
-    // NA : Not applicable
     function getSentenceType($elements){
-        $typeDetermined = false;   
-        
         $csFound = false;
         $nbVerbs = 0;
         $imperativeFound = false;
@@ -73,20 +67,19 @@
             // check if there's an imperative verb
             elseif ($pos == 'VIMP') {
                 $imperativeFound = true;
-            }
-                     
+            }                    
         }
         
         // if a conjonction (qui, que dont, etc) is found
         // and each side has a verb, then it's a composed sentence
         if ($csFound and $nbVerbs >= 2){
-            return 'C';
+            return 'Composed';
         }
         elseif ($imperativeFound){
-            return 'I';
+            return 'Imperative';
         }
         else{
-            return 'S';
+            return 'SVO';
         }              
     }
      
@@ -94,15 +87,18 @@
     function convertSVO($elements){      
         if ($elements == null){
             return '';
-        }
+        }      
         
+        //------------------------------------------
+        // Sort elements into 2 arrays
+        //------------------------------------------
         $start = array();
         $end = array();
         $verbFound = false;
-        $infVerbWithoutPronoun = null;
+        $vinfAlone = null;
         
-        // Sort all elements of the sentence to the right array
-        foreach ($elements as $element){
+        for ($i = 0; $i < count($elements); $i++){
+            $element = $elements[$i];
             $pos = $element->getPos();
             
             // Put what is before the verb in the "end" array
@@ -111,86 +107,71 @@
             }
             
             // Split at the first verb encountered
-            if ($pos == 'V'){
+            if ($pos == 'V' and !$verbFound){
                 $verbFound = true;
             }
             // if an infinitive verb is found
             elseif ($pos == 'VINF'){               
-                // We move put it at the start with it's pronoun
-                $index = $element->getIndex();
-                $prevPos = $elements[$index - 1]->getPos();
-                if ($prevPos == 'CLS' or $prevPos == 'CLO'){
+                // check if the previous word is a pronoun
+                $prevPos = $elements[$i - 1]->getPos();
+                // move the VINF to the start with it's pronoun if found
+                if ($prevPos == 'CLS' or $prevPos == 'CLO' or $prevPos == 'P'){
                     $start[] = $element;
                 }
-                // or we put it at the beginning of the "end" array
-                // AFTER we check that the "start" array is empty
-                // because in sentence "J'aime manger.", we don't want
-                // it in the "end" array.
+                // keep it for the end array otherwise
                 else{
-                    $infVerbWithoutPronoun = $element;                
+                    $vinfAlone = $element;                
                 }
                 
             }
-            // put the rest in the "start" array
-            elseif($pos != 'PUNC' and $verbFound ){
+            // Put what is after the verb in the "start" array
+            elseif($pos != 'PUNC' and $verbFound){
                 $start[] = $element;
-            }
-            
+            }          
         }
-        var_dump($start);
-        var_dump($end);
-                
+        
+        //------------------------------------     
         // Reform sentence
+        //------------------------------------      
         $sentence = '';
+        $noSpaceChars = "\.|\-|,|'";
         
         // if there is no object, either place the infinitive verb before
         // or don't change anything
         if ($start == null){
-            if ($infVerbWithoutPronoun != null){
-                $start[] = $infVerbWithoutPronoun;
+            if ($vinfAlone != null){
+                $start[] = $vinfAlone;
             }
             else{
                 $start = $end;
                 $end = null; 
             }         
         }
-        elseif ($infVerbWithoutPronoun != null){
-            array_unshift($end, $infVerbWithoutPronoun);
+        elseif ($vinfAlone != null){
+            array_unshift($end, $vinfAlone);
         }
        
-        foreach ($start as $element){
-            if ($sentence != ''){
-                // Put spaces between words
-                $sentence .= ' ';
-                $sentence .= $element->getWord();
-            }
-            // First word
-            else{
-                // Change first letter to uppercase
-                // Supports accents
-                $sentence .= mb_substr(
-                        mb_strtoupper($element->getWord()),0,1,'UTF-8')
-                    . mb_substr($element->getWord(), 1);
-            }          
-        }
-        // Separate the start and the end with a comma
+        // Add the start array
+        $sentence .= stringFromElements($start, true);
+        
+        // Add the end if it exists
         if ($end != null){
-            $sentence .= ','; 
-              
-            // Put the subject and verb at the end
-            foreach ($end as $element){
-                if ($sentence != ''){
-                    $sentence .= ' ';
-                }
-                $sentence .= mb_strtolower($element->getWord());
-            }
+            $sentence .= ', ';              
+            $sentence .= stringFromElements($end, false);
         }
+        
         // Put the correct punct. at the end
-        if ($elements[count($elements)-1]->getPos() == 'PUNC'){
-            $sentence .= $elements[count($elements)-1]->getWord();
+        $lastPunc = $elements[count($elements)-1];   
+        if ($lastPunc->getPos() == 'PUNC'){
+            // remove space before if it's a dot
+            if ($lastPunc->getWord() == '.'){
+                $sentence = rtrim($sentence);
+            } 
+            $sentence .= $lastPunc->getWord();
         }
         // put a '.' if there is no punct in the original sentence
         else{
+            $sentence = rtrim($sentence);
             $sentence .= '.';
         }
         return $sentence;
@@ -204,7 +185,9 @@
         $start = array();
         $imperativeVerb = '';
         
+        //---------------------------------
         // Sort elements
+        //---------------------------------
         foreach ($elements as $element){
             $pos = $element->getPos();
             $word = $element->getWord();
@@ -217,37 +200,30 @@
             }
         }
 
+        //---------------------------------
         // Reform sentence
-        $sentence = '';
-             
-        // Put the start
-        foreach ($start as $element){
-            if ($sentence != ''){
-                // Put spaces between words
-                $sentence .= ' ';
-                $sentence .= $element->getWord();
-            }
-            // First word
-            else{
-                // Change first letter to uppercase
-                // Supports accents
-                $sentence .= mb_substr(
-                        mb_strtoupper($element->getWord()),0,1,'UTF-8')
-                    . mb_substr($element->getWord(), 1);
-            }          
-        }
-        // Separate the start and the imperative with a comma   
-        $sentence .= ', '; 
+        //---------------------------------
+        $sentence = '';      
         
+        // Put the start
+        $sentence .= stringFromElements($start, true);       
+        // Separate the start and the imperative with a comma 
+        $sentence .= ', ';         
         // Put the imperative
-        $sentence .= mb_strtolower($imperativeVerb);
+        $sentence .= mb_strtolower($imperativeVerb) . " ";
             
-        // Put the correct punct. at the end
-        if ($elements[count($elements)-1]->getPos() == 'PUNC'){
-            $sentence .= $elements[count($elements)-1]->getWord();
+         // Put the correct punct. at the end
+        $lastPunc = $elements[count($elements)-1];   
+        if ($lastPunc->getPos() == 'PUNC'){
+            // remove space before if it's a dot
+            if ($lastPunc->getWord() == '.'){
+                $sentence = rtrim($sentence);
+            } 
+            $sentence .= $lastPunc->getWord();
         }
-        // put a '.' if there is no punct in the original sentence
+        // Put a '.' if there is no punct in the original sentence
         else{
+            $sentence = rtrim($sentence);
             $sentence .= '.';
         }
         return $sentence;
@@ -261,29 +237,79 @@
         // We need to split the composed sentence into 2 differents
         // and treat them separetely
         $firstSentence = array();
-        $secondSentence = array();
-        
-        $splitterFound = false;
+        $secondSentence = array();        
+        $splitter = null;
         
         foreach ($elements as $element){
             $pos = $element->getPos();
-            if (!$splitterFound){
+            if ($splitter == null and $pos != 'CS'){
                 $firstSentence[] = $element;
+            }
+            elseif ($pos == 'CS'){
+                $splitter = $element->getWord();
             }
             else{
                 $secondSentence[] = $element;
-            }
+            }         
+        }    
+        //---------------------------
+        // Treat each sentence
+        //---------------------------
+        $fullSentence = '';
+        // remove punct at the end of the first sentence  
+        $modifiedFirstSentence = rtrim(ConvertSVO($firstSentence), '.!?');
+        
+        // remove uppercase at the beginning of the second
+        $modifiedSecondSentence = ConvertSVO($secondSentence);
+        $modifiedSecondSentence = mb_substr(mb_strtolower($modifiedSecondSentence)
+                , 0, 1, 'UTF-8') . mb_substr($modifiedSecondSentence, 1);
+        
+        $fullSentence =  $modifiedFirstSentence . ' ' . $splitter
+                . ' ' . $modifiedSecondSentence;      
+        return $fullSentence;
+    }
+    
+    
+    function stringFromElements($elements, $isStart){
+        $string = '';
+        $noSpaceChars = "\.|\-|,|'";
+             
+        foreach ($elements as $element){           
+            $word = $element->getWord();
             
-            if ($pos == 'CS'){
-                $splitterFound = true;
+            // First word with uppercase if specified
+            if ($string == '' and $isStart){
+                // Change first letter to uppercase
+                // Supports accents
+                $string .= mb_substr(mb_strtoupper($word),0,1,'UTF-8')
+                    . mb_substr($word, 1);         
+            }        
+            else{
+                // Remove last space if the word begins with "-"
+                $charToCheck = mb_substr($word, 0, 1);
+                mb_ereg_search_init($charToCheck, '-');
+                if (mb_ereg_search()){
+                    $string = rtrim($string);
+                }
+                
+                // Add word with lowercase if it isn't a named person
+                if ($element->getPos() == 'NPP'){
+                    $string .= $word;
+                }
+                else{
+                    $string .= mb_strtolower($word);
+                }  
+            }         
+            // Put a space after if needed
+            // We need to look for dots, comma, dash and apostrophe           
+            $charToCheck = mb_substr($word, strlen($word)-1);
+            mb_ereg_search_init($charToCheck, $noSpaceChars);
+            if (!mb_ereg_search()){
+                $string .= ' ';
             }
         }
-        
-        $fullSentence = '';
-        
-        $fullSentence .= ConvertSVO($firstSentence);
-        $fullSentence .= ConvertSVO($secondSentence);
-        
-        return $fullSentence;
+        // remove useless last space
+        $string = rtrim($string);
+        return $string;
     }
 ?>
