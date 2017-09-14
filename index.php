@@ -25,7 +25,8 @@
             <p><label for="idTextToConvert">Texte à convertir :</label></p>
             <p><textarea id="idTextToConvert" name="v_TextToConvert"
                          rows="4" cols="50"
-                         placeholder="Ecrire ici ta phrase à modifier, tu dois."><?php
+                         placeholder="Ecrire ici ta phrase à modifier, tu dois."
+                         ><?php
                     if (isset($textToConvert)){
                         echo $textToConvert;
                     }
