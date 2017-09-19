@@ -1,6 +1,6 @@
 <?php    
     // Base URL of the server
-    define('SERVER_URL', 'http://192.168.154.129/');
+    define('SERVER_URL', 'http://192.168.154.130:9000/');
     // Properties for a POST request returning part-of-speech in French
     define('PROPERTIES','?properties='
             . '%7B%22annotators%22%3A%20%22tokenize%2Cssplit%2Cparse%2Cpos%22'
@@ -25,7 +25,10 @@
 
         // Returns the error if encountered
         if (curl_errno($ch)) {
-                $result = 'Error:' . curl_error($ch);
+            if (DEBUG){
+                print 'Error:' . curl_error($ch);
+            }
+            $result = null;         
         }
         // Close curl
         curl_close ($ch);
