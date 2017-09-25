@@ -305,8 +305,12 @@ function convertComposed($elements){
         }         
     }    
 
-    var_dump($firstSentence);
-    var_dump($secondSentence);
+    if (DEBUG){
+        echo 'First sentence';
+        var_dump($firstSentence);
+        echo 'Second sentence';
+        var_dump($secondSentence);
+    }
 
     // Treat each sentence
     $fullSentence = '';             
