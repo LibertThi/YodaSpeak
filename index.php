@@ -22,8 +22,8 @@
     <meta name="keywords" content="HTML,CSS,XML,JavaScript">
     <meta name="author" content="Thibault Libert">
     <title>Yoda Speak</title>
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css"
-  rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
     <style>
         #yoda{
             width: 200px;
@@ -105,7 +105,7 @@
         <button type="submit" name="v_Convert">Convertir</button>
     </form>
     <?php       
-    if (isset($textToConvert)){
+    if (!empty($textToConvert)){
         // retrieves json from corenlp server
         $json = postRequest($textToConvert);
 
@@ -121,18 +121,17 @@
                 echo $element->getWord() . '('. $element->getPOS(). ') ';
             }
             echo '</p>';
-       }
-
+        }
         // Display the converted sentence
         //echo '<h2>Yoda dit:</h2><p>';       
-        echo '<div id="bubble">
+        echo
+            '<div id="bubble">
             <span id="text">' . convert($elements) . '</span>
             <span id="arrow_border"></span>
             <span id="arrow_inner"></span>
             </div>';
-        echo '<img id="yoda" src="images/dank-yoda.png"/>';
-        echo '</p>';
     }
+    echo '<img id="yoda" src="images/dank-yoda.png"/>';
     ?>
     </div>
 </body>
