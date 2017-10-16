@@ -1,17 +1,25 @@
 <?php    
     // set to false to disable the display of some debug elements
-    define('DEBUG', false);
-    define('MAX_LENGTH', 140);
+    define('DEBUG', true);
+    // Maximum length of input
+    define('INPUT_MAX_LENGTH', 140);
+    // Base URL of the server
+    define('SERVER_URL', 'http://192.168.154.130:9000/');
+    // Properties for a POST request returning part-of-speech in French
+    define('PROPERTIES','?properties='
+            . '%7B%22annotators%22%3A%20%22tokenize%2Cssplit%2Cparse%2Cpos%22'
+            . '%7D&pipelineLanguage=fr');
     
     // Load functions
     include('element.php');
-    include('connect_api.php');
+    include('corenlp.php');
     include('convert_to_yoda_speak.php');
       
     // Get user input if it exists
     if (isset($_POST['v_TextToConvert'])){
         $textToConvert = filter_input(INPUT_POST, 'v_TextToConvert',
                 FILTER_SANITIZE_STRING);
+        $textToConvert = trim($textToConvert);
     }
 ?>
 <!DOCTYPE html>
@@ -45,7 +53,7 @@
                     <label>Votre texte (maximum 140 caractères)</label>
                     <textarea id="idTextToConvert" name="v_TextToConvert"
                              rows="4"
-                             maxlength="<?php echo MAX_LENGTH;?>"
+                             maxlength="<?php echo INPUT_MAX_LENGTH;?>"
                              placeholder="Ecrire ici ta phrase à modifier, tu dois."
                              ><?php
                         if (isset($textToConvert)){
@@ -58,14 +66,27 @@
         </section>        
         <?php       
         if (!empty($textToConvert)){
-            // retrieves json from corenlp server
-            $json = postRequest($textToConvert);
-
-            // convert it to an array of elements with pos
-            $elements = jsonToElements($json);
-
+            $sentence = $textToConvert;
+            
+            // create a new connection on corenlp
+            $corenlp = new corenlp(SERVER_URL, PROPERTIES);   
+            // connect to server and convert
+            if ($corenlp->testConnection()){
+                // retrieves json from corenlp server
+                $json = $corenlp->postRequest($textToConvert);
+                // convert it to an array of elements with pos
+                $elements = $corenlp->jsonToElements($json);
+                $sentence = convert($elements);
+            }
+            // print "error" if server is unreachable
+            else{
+                $sentence = 'Une perturbation dans la Force, '
+                        . 'à me connecter m\'empêche.';
+            }
+            // display infos when in debug mode
             if (DEBUG){
-                echo '<div class="row"><div class="col-12">';
+                echo '<section class="row" style="margin-top:10px;"><div class="col-12">';
+                echo '<h2 style="color:red;">DEBUG</h2>';
                 // print json
                 echo '<h2>JSON:</h2><p>' . $json . '</p>';
                 // print annotated sentence
@@ -74,7 +95,7 @@
                     echo $element->getWord() . '('. $element->getPOS(). ') ';
                 }
                 echo '</p>';
-                echo '</div></div>';
+                echo '</div></section>';
             }
             
             // random number to display a random img of yoda
@@ -82,14 +103,14 @@
             echo
             '<div class="row justify-content-center">
                 <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4" id="bubble">
-                <span id="text">' . convert($elements) . '</span>
+                <span id="text">' . $sentence . '</span>
                 <span id="arrow_border"></span>
                 <span id="arrow_inner"></span>
             </div>                 
             </div>
             <div class="row justify-content-center">
                 <div class="col-xs-8 col-sm-8 col-md-6 col-lg-4">
-                    <img id="yoda" src="images/yoda-0'. $numImg . '.png"/>
+                    <img id="yoda" src="images/yoda-0'. $numImg . '.png" alt="Yoda"/>
                 </div>
             </div>';           
         }   

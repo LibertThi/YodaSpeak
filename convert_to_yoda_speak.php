@@ -383,13 +383,6 @@ function stringFromElements($elements, $isStart){
             $string .= mb_ucfirst($word, 'UTF-8'); 
         }        
         else{
-            // Remove last space if the word begins with "-"
-            $charToCheck = mb_substr($word, 0, 1);
-
-            if (preg_match("/^-$/", $charToCheck)){
-                $string = rtrim($string);
-            }
-
             // Add word with lowercase if it isn't a named person
             if ($element->getPos() == 'NPP'){
                 $string .= $word;
@@ -398,12 +391,12 @@ function stringFromElements($elements, $isStart){
                 $string .= mb_strtolower($word);
             }  
         }         
-        // Put a space after if needed
-        // We need to look for dots, comma, dash and apostrophe           
-        $charToCheck = mb_substr($word, strlen($word) - 1);
-        if (!preg_match($noSpaceChars, $charToCheck)){
+        var_dump($element);
+        // Put a space
+        if (!preg_match($noSpaceChars, $word)){        
             $string .= ' ';
-        }
+        }  
+
     }
     // remove useless last space
     $string = rtrim($string);
