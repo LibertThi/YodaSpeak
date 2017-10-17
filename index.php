@@ -11,9 +11,9 @@
             . '%7D&pipelineLanguage=fr');
     
     // Load functions
-    include('element.php');
-    include('corenlp.php');
-    include('convert_to_yoda_speak.php');
+    require_once('element.php');
+    require_once('corenlp.php');
+    require_once('convert_to_yoda_speak.php');
       
     // Get user input if it exists
     if (isset($_POST['v_TextToConvert'])){
@@ -45,7 +45,10 @@
         <section class="row"> 
             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
                 <p>
-                    Tempore quo primis auspiciis in mundanum fulgorem surgeret victura dum erunt homines Roma, ut augeretur sublimibus incrementis, foedere pacis aeternae Virtus convenit atque Fortuna plerumque dissidentes, quarum si altera defuisset, ad perfectam non venerat summitatem.
+                    <strong>Bienvenue !</strong> Entrez une phrase pour que Yoda
+                    puisse la prononcer à sa manière. De sa galaxie lointaine, 
+                    Yoda ne connait pas le langage SMS, il lui faut donc une 
+                    phrase en bon français pour qu'il communique correctement. 
                 </p>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
@@ -81,7 +84,7 @@
             // print "error" if server is unreachable
             else{
                 $sentence = 'Une perturbation dans la Force, '
-                        . 'à me connecter m\'empêche.';
+                        . 'à me connecter m\'empêche. Réessayer plus tard, tu dois.';
             }
             // display infos when in debug mode
             if (DEBUG){
@@ -102,7 +105,7 @@
             $numImg = rand(1, 4);          
             echo
             '<div class="row justify-content-center">
-                <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4" id="bubble">
+                <div class="col-xs-8 col-sm-8 col-md-6 col-lg-4" id="bubble">
                 <span id="text">' . $sentence . '</span>
                 <span id="arrow_border"></span>
                 <span id="arrow_inner"></span>

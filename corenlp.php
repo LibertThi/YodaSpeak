@@ -50,7 +50,10 @@
         }
         
         public function jsonToElements($json){
-            // Decode json in a "raw" array
+            // decode the json first
+            $json = html_entity_decode($json, ENT_QUOTES, "UTF-8");
+
+            // parse json in a "raw" array
             $jsonToArray = json_decode($json, true);
             
             $elements = array();
@@ -61,7 +64,7 @@
 
             foreach ($jsonToArray['sentences'] as $sentence){
                 $numSentence = $sentence['index'];
-                foreach ($sentence['tokens'] as $tokens){
+                foreach ($sentence['tokens'] as $tokens){                    
                     $element = new element($tokens['index']-1,
                                         $numSentence,
                                         $tokens['word'],

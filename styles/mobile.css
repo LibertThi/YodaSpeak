@@ -6,9 +6,8 @@
 body{
     background-attachment: fixed;
     background-image: url("../images/wallpaper.jpg");  
-    background-attachment: fixed;
     background-size: cover; 
-    background-position: center center;
+    background-position-x: 60%;
 }
 
 header{

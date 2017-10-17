@@ -5,7 +5,7 @@
         <group>
             <file>file:/C:/wamp/www/LibertT/YodaSpeak/styles/style.css</file>
             <file>file:/C:/wamp/www/LibertT/YodaSpeak/convert_to_yoda_speak.php</file>
-            <file>file:/C:/wamp/www/LibertT/YodaSpeak/connect_api.php</file>
+            <file>file:/C:/wamp/www/LibertT/YodaSpeak/corenlp.php</file>
             <file>file:/C:/wamp/www/LibertT/YodaSpeak/index.php</file>
         </group>
     </open-files>

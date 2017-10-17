@@ -145,6 +145,12 @@ function convertSVO($elements){
         if ($pos == 'V' and !$verbFound){
             $verbFound = true;
         }
+        elseif ($pos == 'VPP'){
+            $prevPos = $elements[$i - 1]->getPos();
+            if ($prevPos == 'V'){
+                $end[] = $element;
+            }
+        }     
         // if an infinitive verb is found
         elseif ($pos == 'VINF'){               
             // check if the previous word is a pronoun
@@ -383,6 +389,11 @@ function stringFromElements($elements, $isStart){
             $string .= mb_ucfirst($word, 'UTF-8'); 
         }        
         else{
+            // If we treat a "no space" char, remove last space
+            if (preg_match($noSpaceChars, $word)){
+                $string = rtrim($string);
+            }
+            
             // Add word with lowercase if it isn't a named person
             if ($element->getPos() == 'NPP'){
                 $string .= $word;
@@ -391,12 +402,10 @@ function stringFromElements($elements, $isStart){
                 $string .= mb_strtolower($word);
             }  
         }         
-        var_dump($element);
-        // Put a space
+        // Put a space, but check for "no space" char. first
         if (!preg_match($noSpaceChars, $word)){        
             $string .= ' ';
         }  
-
     }
     // remove useless last space
     $string = rtrim($string);
