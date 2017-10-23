@@ -1,6 +1,6 @@
 <?php    
     // set to false to disable the display of some debug elements
-    define('DEBUG', true);
+    define('DEBUG', false);
     // Maximum length of input
     define('INPUT_MAX_LENGTH', 140);
     // Base URL of the server
@@ -20,6 +20,9 @@
         $textToConvert = filter_input(INPUT_POST, 'v_TextToConvert',
                 FILTER_SANITIZE_STRING);
         $textToConvert = trim($textToConvert);
+        if (strlen($textToConvert) > INPUT_MAX_LENGTH){
+            $textToConvert = mb_substr($textToConvert,0,INPUT_MAX_LENGTH);
+        }
     }
 ?>
 <!DOCTYPE html>
@@ -32,6 +35,8 @@
     <meta name="author" content="Thibault Libert">
     <title>Yoda Speak</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="styles/style.css"/>
 </head>
 <body>
@@ -52,8 +57,8 @@
                 </p>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
-                <form action="index.php" method="post">
-                    <label>Votre texte (maximum 140 caractères)</label>
+                <form action="index.php" method="post">                     
+                    <label>Votre texte (<span id='remainingC'><?php echo INPUT_MAX_LENGTH;?></span>/<?php echo INPUT_MAX_LENGTH;?> caractères)</label>
                     <textarea id="idTextToConvert" name="v_TextToConvert"
                              rows="4"
                              maxlength="<?php echo INPUT_MAX_LENGTH;?>"
@@ -125,5 +130,21 @@
             </div>    
         </footer>
     </div>
+    <script type="text/javascript">       
+        function updateCharCounter(){
+            var textarea = document.querySelector("#idTextToConvert");
+            var maxLength = <?php echo INPUT_MAX_LENGTH;?>;
+            var currentLength = textarea.value.length;
+            
+            $("#remainingC").html(maxLength - currentLength);
+        }
+        
+        $(document).ready(function(){
+            updateCharCounter();
+        });
+        
+        var textarea = document.querySelector("#idTextToConvert");
+        textarea.addEventListener("input", updateCharCounter);      
+    </script>
 </body>
 </html>

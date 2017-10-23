@@ -116,7 +116,7 @@ textarea{
     line-height:0;
     border-bottom:30px solid transparent;
     border-right:30px solid transparent;
-    border-left:30px solid black; /* couleur de la bordure de la bulle */
+    border-left:30px solid #555555; /* couleur de la bordure de la bulle */
     position:absolute;
     bottom:-30px;
     right:30px;

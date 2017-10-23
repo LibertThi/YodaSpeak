@@ -20,11 +20,10 @@ function convert($elements){
         // use the appropriate method to treat the sentence
         // depending of its type
         $sentenceType = getSentenceType($sentence);
-
         switch ($sentenceType){
             // Composed
             case 'Composed':
-            case 'Passive':
+            case 'Passive':               
                 $result .= convertComposed($sentence);
                 break;
             // Imperative
@@ -77,10 +76,9 @@ function getSentenceType($elements){
 
     // loop into the sentence to determinate it's type
     foreach ($elements as $element){
-        $pos = $element->getPos();
-
+        $pos = $element->getPos();        
         // spot conjonction to look for composed sentence
-        if ($pos == 'CS' or $pos == 'CC'){
+        if ($pos == 'CS' or $pos == 'CC' or $pos == 'PROREL'){
             $csFound = true;
         }
         // count verbs in each side of the conjonction
@@ -91,11 +89,7 @@ function getSentenceType($elements){
         elseif ($pos == 'VIMP') {
             $imperativeFound = true;
         }  
-        elseif ($pos == 'PROREL' and $nbVerbs == 0){
-            $isPassive = true;
-        }
     }
-
     // if a conjonction (qui, que dont, etc) is found
     // and each side has a verb, then it's a composed sentence
     if ($csFound and $nbVerbs >= 2){
@@ -140,25 +134,22 @@ function convertSVO($elements){
         if (!$verbFound and $pos != 'PUNC'){             
            $end[] = $element;
         }
-
         // Split at the first verb encountered
         if ($pos == 'V' and !$verbFound){
             $verbFound = true;
         }
-        elseif ($pos == 'VPP'){
-            $prevPos = $elements[$i - 1]->getPos();
-            if ($prevPos == 'V'){
-                $end[] = $element;
-            }
-        }     
         // if an infinitive verb is found
         elseif ($pos == 'VINF'){               
             // check if the previous word is a pronoun
             $prevPos = $elements[$i - 1]->getPos();
-            // move the VINF to the start with it's pronoun if found
-            if ($prevPos == 'CLS' or $prevPos == 'CLO' or $prevPos == 'P'){
+            // move the VINF to the start with it's pronoun or "VPP"
+            if ($prevPos == 'CLS'
+                    or $prevPos == 'CLO'
+                    or $prevPos == 'P'
+                    or $prevPos == 'VPP'){
                 $start[] = $element;
             }
+
             // keep it for the end array otherwise
             else{
                 $vinfAlone = $element;                
