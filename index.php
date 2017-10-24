@@ -1,15 +1,6 @@
 <?php    
-    // set to false to disable the display of some debug elements
-    define('DEBUG', false);
-    // Maximum length of input
-    define('INPUT_MAX_LENGTH', 140);
-    // Base URL of the server
-    define('SERVER_URL', 'http://192.168.154.130:9000/');
-    // Properties for a POST request returning part-of-speech in French
-    define('PROPERTIES','?properties='
-            . '%7B%22annotators%22%3A%20%22tokenize%2Cssplit%2Cparse%2Cpos%22'
-            . '%7D&pipelineLanguage=fr');
-    
+    // Load config
+    require_once('config.inc.php');    
     // Load functions
     require_once('element.php');
     require_once('corenlp.php');
@@ -51,24 +42,30 @@
             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
                 <p>
                     <strong>Bienvenue !</strong> Entrez une phrase pour que Yoda
-                    puisse la prononcer à sa manière. De sa galaxie lointaine, 
-                    Yoda ne connait pas le langage SMS, il lui faut donc une 
-                    phrase en bon français pour qu'il communique correctement. 
+                    puisse la prononcer à sa manière. De sa galaxie lointaine,
+                    très lointaine, Yoda ne connait pas le langage SMS, 
+                    il lui faut donc une phrase en bon français pour 
+                    qu'il communique correctement. 
                 </p>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
-                <form action="index.php" method="post">                     
-                    <label>Votre texte (<span id='remainingC'><?php echo INPUT_MAX_LENGTH;?></span>/<?php echo INPUT_MAX_LENGTH;?> caractères)</label>
+                <form action="<?php echo $_SERVER['PHP_SELF'];?>" method="post">                     
+                    <label>Votre texte (<span id='remainingC'></span>/<?php echo INPUT_MAX_LENGTH;?>)</label>
                     <textarea id="idTextToConvert" name="v_TextToConvert"
-                             rows="4"
-                             maxlength="<?php echo INPUT_MAX_LENGTH;?>"
-                             placeholder="Ecrire ici ta phrase à modifier, tu dois."
-                             ><?php
+                            rows="4"
+                            autofocus
+                            spellcheck="true"
+                            onfocus="selectAll(this)"
+                            maxlength="<?php echo INPUT_MAX_LENGTH;?>"
+                            placeholder="Ecrire ici ta phrase à modifier, tu dois."
+                            ><?php
                         if (isset($textToConvert)){
                             echo $textToConvert;
                         }
                     ?></textarea>
-                    <button type="submit" name="v_Convert">Convertir</button>
+                    <button type="submit"
+                        id="submit"
+                        name="v_Convert">Convertir</button>
                 </form>
             </div>
         </section>        
@@ -122,7 +119,10 @@
                 </div>
             </div>';           
         }   
-        ?>               
+        ?>  
+        <div id="loading">
+            <div id="load_icon"></div>
+        </div>
         <!-- Footer -->
         <footer class="row">
             <div class="col-12">
@@ -130,21 +130,59 @@
             </div>    
         </footer>
     </div>
-    <script type="text/javascript">       
+    <script type="text/javascript">
+        // Display how many char. are available
         function updateCharCounter(){
             var textarea = document.querySelector("#idTextToConvert");
             var maxLength = <?php echo INPUT_MAX_LENGTH;?>;
             var currentLength = textarea.value.length;
+
+            if (currentLength >= maxLength){
+                document.getElementById('remainingC').style.color = "red";
+            }
+            else{
+                document.getElementById('remainingC').style.color = "black";
+            }
+            // update text
+            $("#remainingC").html(currentLength);
             
-            $("#remainingC").html(maxLength - currentLength);
+            
+            // update submit button to allow click, or not
+            if (currentLength === 0){
+                $("#submit").attr('disabled',true);
+            }
+            else{
+                $("#submit").removeAttr('disabled',false);
+            }
         }
+        // Display a loading icon when submit button is clicked
+        $("#submit").click(function(){
+            document.getElementById('loading').style.display = "block";
+        });
         
+        // Refresh char counter on load
         $(document).ready(function(){
             updateCharCounter();
         });
         
+        // Catch "enter" to fire submit instead of new line
+        $("#idTextToConvert").keypress(function (e) {
+            if(e.which === 13 && !e.shiftKey) {
+                e.preventDefault();
+                // submit only if the button is enabled
+                if ($("#submit").attr('disabled') != 'disabled'){
+                    $("#submit").click();    
+                } 
+            }
+        });
+        
+        // Select all text in textarea (with a timeout to bypass the browser focus)
+        function selectAll(textArea){
+            setTimeout(function(){textArea.select();},10);
+        }
+        // Listen to input on textarea to update char counter
         var textarea = document.querySelector("#idTextToConvert");
-        textarea.addEventListener("input", updateCharCounter);      
+        textarea.addEventListener("input", updateCharCounter);
     </script>
 </body>
 </html>

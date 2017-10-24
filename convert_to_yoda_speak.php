@@ -30,6 +30,10 @@ function convert($elements){
             case 'Imperative':
                 $result .= convertImperative($sentence);
                 break;
+            // Interrogative
+            case 'Interrogative':
+                $result .= convertInterrogative($sentence);
+                break;
             // 'Standard'
             case 'SVO':
             default:
@@ -73,6 +77,7 @@ function getSentenceType($elements){
     $nbVerbs = 0;
     $imperativeFound = false;
     $isPassive = false;
+    $questionWordFound = false;
 
     // loop into the sentence to determinate it's type
     foreach ($elements as $element){
@@ -88,7 +93,10 @@ function getSentenceType($elements){
         // check if there's an imperative verb
         elseif ($pos == 'VIMP') {
             $imperativeFound = true;
-        }  
+        }
+        elseif ($pos == 'PROWH'){
+            $questionWordFound = true;
+        }
     }
     // if a conjonction (qui, que dont, etc) is found
     // and each side has a verb, then it's a composed sentence
@@ -100,6 +108,9 @@ function getSentenceType($elements){
     }
     elseif ($isPassive){
         return 'Passive';
+    }
+    elseif ($questionWordFound){
+        return 'Interrogative';
     }
     else{
         return 'SVO';
@@ -336,6 +347,10 @@ function convertComposed($elements){
     return $fullSentence;
 }
 
+function convertInterrogative($sentence){
+    return stringFromElements($sentence, true);
+}
+
 /**
  * A "ucfirst" function that works with accents
  * Exemple: turns "était" into "Était"
@@ -380,8 +395,8 @@ function stringFromElements($elements, $isStart){
             $string .= mb_ucfirst($word, 'UTF-8'); 
         }        
         else{
-            // If we treat a "no space" char, remove last space
-            if (preg_match($noSpaceChars, $word)){
+            // If the first char is a "no space char", remove last space
+            if (preg_match($noSpaceChars, substr($word, 0, 1))){
                 $string = rtrim($string);
             }
             
