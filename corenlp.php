@@ -34,8 +34,13 @@
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
             // Execute the curl command
+            try{
             $result = curl_exec($ch);
-
+            }
+            catch(CURLException $e){
+                $result = 'Curl timeout';
+            }
+            
             // Returns the error if encountered
             if (curl_errno($ch)) {
                 if (DEBUG){

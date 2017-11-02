@@ -29,6 +29,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="styles/style.css"/>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
     <div id="background-opacity"></div>
@@ -50,7 +52,7 @@
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
                 <form action="<?php echo $_SERVER['PHP_SELF'];?>" method="post">                     
-                    <label>Votre texte (<span id='remainingC'></span>/<?php echo INPUT_MAX_LENGTH;?>)</label>
+                    <label>Votre texte<span id="charCounter" style="display:none;"> (<span id='currentChar'></span>/<?php echo INPUT_MAX_LENGTH;?>)</span></label>
                     <textarea id="idTextToConvert" name="v_TextToConvert"
                             rows="4"
                             autofocus
@@ -131,58 +133,8 @@
         </footer>
     </div>
     <script type="text/javascript">
-        // Display how many char. are available
-        function updateCharCounter(){
-            var textarea = document.querySelector("#idTextToConvert");
-            var maxLength = <?php echo INPUT_MAX_LENGTH;?>;
-            var currentLength = textarea.value.length;
-
-            if (currentLength >= maxLength){
-                document.getElementById('remainingC').style.color = "red";
-            }
-            else{
-                document.getElementById('remainingC').style.color = "black";
-            }
-            // update text
-            $("#remainingC").html(currentLength);
-            
-            
-            // update submit button to allow click, or not
-            if (currentLength === 0){
-                $("#submit").attr('disabled',true);
-            }
-            else{
-                $("#submit").removeAttr('disabled',false);
-            }
-        }
-        // Display a loading icon when submit button is clicked
-        $("#submit").click(function(){
-            document.getElementById('loading').style.display = "block";
-        });
-        
-        // Refresh char counter on load
-        $(document).ready(function(){
-            updateCharCounter();
-        });
-        
-        // Catch "enter" to fire submit instead of new line
-        $("#idTextToConvert").keypress(function (e) {
-            if(e.which === 13 && !e.shiftKey) {
-                e.preventDefault();
-                // submit only if the button is enabled
-                if ($("#submit").attr('disabled') != 'disabled'){
-                    $("#submit").click();    
-                } 
-            }
-        });
-        
-        // Select all text in textarea (with a timeout to bypass the browser focus)
-        function selectAll(textArea){
-            setTimeout(function(){textArea.select();},10);
-        }
-        // Listen to input on textarea to update char counter
-        var textarea = document.querySelector("#idTextToConvert");
-        textarea.addEventListener("input", updateCharCounter);
+        const INPUT_MAX_LENGTH = <?php echo json_encode(INPUT_MAX_LENGTH);?>;
     </script>
+    <script type="text/javascript" src="scripts.js"></script>
 </body>
 </html>
