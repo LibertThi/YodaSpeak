@@ -1,4 +1,5 @@
 <?php    
+    session_start();
     // Load config
     require_once('config.inc.php');    
     // Load functions
@@ -14,6 +15,13 @@
         if (strlen($textToConvert) > INPUT_MAX_LENGTH){
             $textToConvert = mb_substr($textToConvert,0,INPUT_MAX_LENGTH);
         }
+        if (isset($_SESSION['reponse'])){
+            var_dump($_SESSION['reponse']);
+        }
+        
+        session_unset();
+        $_SESSION['demande'] = $textToConvert;
+        
     }
 ?>
 <!DOCTYPE html>
@@ -76,7 +84,7 @@
             $sentence = $textToConvert;
             
             // create a new connection on corenlp
-            $corenlp = new corenlp(SERVER_URL, PROPERTIES);   
+            $corenlp = new corenlp(SERVER_URL, PROPERTIES);
             // connect to server and convert
             if ($corenlp->testConnection()){
                 // retrieves json from corenlp server
