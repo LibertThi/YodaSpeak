@@ -8,7 +8,7 @@
     }
     $uid = filter_input(INPUT_GET,'uid',FILTER_SANITIZE_STRING);
     if ($uid != UID) {
-        header("HTTP/1.1 403 Forbidden" );
+        header("HTTP/1.1 403 Forbidden");
         exit;
     }
     $sessions_path = session_save_path();

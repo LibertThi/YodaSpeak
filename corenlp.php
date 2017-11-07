@@ -52,32 +52,6 @@
             curl_close ($ch);
 
             return $result;         
-        }
-        
-        public function jsonToElements($json){
-            // decode the json first
-            $json = html_entity_decode($json, ENT_QUOTES, "UTF-8");
-
-            // parse json in a "raw" array
-            $jsonToArray = json_decode($json, true);
-            
-            $elements = array();
-
-            if (!isset($jsonToArray['sentences'])){
-                return null;
-            }
-
-            foreach ($jsonToArray['sentences'] as $sentence){
-                $numSentence = $sentence['index'];
-                foreach ($sentence['tokens'] as $tokens){                    
-                    $element = new element($tokens['index']-1,
-                                        $numSentence,
-                                        $tokens['word'],
-                                        $tokens['pos']);
-                    $elements[] = $element;
-                }
-            }
-            return $elements;
-        }	
+        }       	
     }
 ?>

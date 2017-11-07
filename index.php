@@ -3,26 +3,8 @@
     // Load config
     require_once('config.inc.php');    
     // Load functions
-    require_once('element.php');
-    require_once('corenlp.php');
-    require_once('convert_to_yoda_speak.php');
-      
-    // Get user input if it exists
-    if (isset($_POST['v_TextToConvert'])){
-        $textToConvert = filter_input(INPUT_POST, 'v_TextToConvert',
-                FILTER_SANITIZE_STRING);
-        $textToConvert = trim($textToConvert);
-        if (strlen($textToConvert) > INPUT_MAX_LENGTH){
-            $textToConvert = mb_substr($textToConvert,0,INPUT_MAX_LENGTH);
-        }
-        if (isset($_SESSION['reponse'])){
-            var_dump($_SESSION['reponse']);
-        }
-        
-        session_unset();
-        $_SESSION['demande'] = $textToConvert;
-        
-    }
+    require_once('element.php');          
+    
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -59,77 +41,35 @@
                 </p>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
-                <form action="<?php echo $_SERVER['PHP_SELF'];?>" method="post">                     
+                <form>                     
                     <label>Votre texte<span id="charCounter" style="display:none;"> (<span id='currentChar'></span>/<?php echo INPUT_MAX_LENGTH;?>)</span></label>
-                    <textarea id="idTextToConvert" name="v_TextToConvert"
+                    <textarea id="textToConvert"
                             rows="4"
                             autofocus
                             spellcheck="true"
                             onfocus="selectAll(this)"
                             maxlength="<?php echo INPUT_MAX_LENGTH;?>"
                             placeholder="Ecrire ici ta phrase à modifier, tu dois."
-                            ><?php
-                        if (isset($textToConvert)){
-                            echo $textToConvert;
-                        }
+                            ><?php                       
                     ?></textarea>
-                    <button type="submit"
-                        id="submit"
-                        name="v_Convert">Convertir</button>
+                    <input type="button" id="convert" value="Convertir">
                 </form>
             </div>
         </section>        
-        <?php       
-        if (!empty($textToConvert)){
-            $sentence = $textToConvert;
-            
-            // create a new connection on corenlp
-            $corenlp = new corenlp(SERVER_URL, PROPERTIES);
-            // connect to server and convert
-            if ($corenlp->testConnection()){
-                // retrieves json from corenlp server
-                $json = $corenlp->postRequest($textToConvert);
-                // convert it to an array of elements with pos
-                $elements = $corenlp->jsonToElements($json);
-                $sentence = convert($elements);
-            }
-            // print "error" if server is unreachable
-            else{
-                $sentence = 'Une perturbation dans la Force, '
-                        . 'à me connecter m\'empêche. Réessayer plus tard, tu dois.';
-            }
-            // display infos when in debug mode
-            if (DEBUG){
-                echo '<section class="row" style="margin-top:10px;"><div class="col-12">';
-                echo '<h2 style="color:red;">DEBUG</h2>';
-                // print json
-                echo '<h2>JSON:</h2><p>' . $json . '</p>';
-                // print annotated sentence
-                echo '<h2>Phrase annotée:</h2><p>';
-                foreach ($elements as $element){
-                    echo $element->getWord() . '('. $element->getPOS(). ') ';
-                }
-                echo '</p>';
-                echo '</div></section>';
-            }
-            
-            // random number to display a random img of yoda
-            $numImg = rand(1, 4);          
-            echo
-            '<div class="row justify-content-center">
+        <div id="reponse" display="none">
+            <div class="row justify-content-center">
                 <div class="col-xs-8 col-sm-8 col-md-6 col-lg-4" id="bubble">
-                <span id="text">' . $sentence . '</span>
+                <span id="response"></span>
                 <span id="arrow_border"></span>
                 <span id="arrow_inner"></span>
             </div>                 
             </div>
             <div class="row justify-content-center">
                 <div class="col-xs-8 col-sm-8 col-md-6 col-lg-4">
-                    <img id="yoda" src="images/yoda-0'. $numImg . '.png" alt="Yoda"/>
+                    <img id="yoda" src="images/yoda-0<?php echo rand(1, 4);?>.png" alt="Yoda"/>
                 </div>
-            </div>';           
-        }   
-        ?>  
+            </div>
+        </div>
         <div id="loading">
             <div id="load_icon"></div>
         </div>
