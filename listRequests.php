@@ -20,12 +20,18 @@
             $requests[$entry] = false;
         }
     }
+    if (empty($requests)){
+        exit;
+    }
     // get content for each sess_id
     foreach ($requests as $sess_id => $sess_content){
         $file_content = file_get_contents($sessions_path . '/' . $sess_id);    
         $pattern = '/demande\|s:\d+:"(.*?)".*/';
         $request = preg_match($pattern, $file_content, $matches);
-        $requests[$sess_id] = $matches[1];
+        if (!empty($matches)){
+            $requests[$sess_id] = $matches[1];
+        }
     }
-    echo urlencode(json_encode($requests));
+    $json = urlencode(json_encode($requests));
+    echo $json;
 ?>

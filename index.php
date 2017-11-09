@@ -1,5 +1,5 @@
 <?php    
-    session_start();
+    //session_start();
     // Load config
     require_once('config.inc.php');    
     // Load functions
@@ -50,16 +50,15 @@
                             onfocus="selectAll(this)"
                             maxlength="<?php echo INPUT_MAX_LENGTH;?>"
                             placeholder="Ecrire ici ta phrase à modifier, tu dois."
-                            ><?php                       
-                    ?></textarea>
+                            ></textarea>
                     <input type="button" id="convert" value="Convertir">
                 </form>
             </div>
         </section>        
-        <div id="reponse" display="none">
+        <div id="yodaBlock" style="display: none;">
             <div class="row justify-content-center">
                 <div class="col-xs-8 col-sm-8 col-md-6 col-lg-4" id="bubble">
-                <span id="response"></span>
+                <span id="yodaResponse"></span>
                 <span id="arrow_border"></span>
                 <span id="arrow_inner"></span>
             </div>                 

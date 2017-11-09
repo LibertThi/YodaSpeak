@@ -23,23 +23,32 @@ function updateCharCounter(){
     }
 }
 // Display a loading icon when submit button is clicked
-$("#convert").click(function(){
-    var response = getResponse();
-    $("#text").html(response);
-});
+$("#convert").click(getResponse);
 
 function getResponse(){
-    var param = $("#textToConvert").html();
+    var param = $("#textToConvert").val();
+
     $.get(
-        'fetchResponse.php',
-        param,
+        'fetchResponse.php?text=' + param,
         handler,
         'text'
     );
-    var response;
-    function handler(getResponse){
-        response = getResponse;
-    }      
+ 
+    function handler(data){
+        if (data === '100'){
+            // no request
+        }
+        else if (data === '200'){
+            // no response yet
+            $("#loading").css('display',"block");
+            getResponse();
+        }
+        else {
+            $("#yodaResponse").html(data);
+            $("#yodaBlock").css('display',"block");
+            $("#loading").css('display',"none");
+        }
+    }
     //$("#loading").css('display',"block");
 }
 

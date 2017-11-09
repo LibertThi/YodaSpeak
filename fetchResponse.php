@@ -16,6 +16,11 @@
     if (strlen($textToConvert) > INPUT_MAX_LENGTH){
             $textToConvert = mb_substr($textToConvert,0,INPUT_MAX_LENGTH);
     }
+    
+    if (empty($textToConvert)){
+        echo '100';
+        exit;
+    }
 
     if (!empty($textToConvert) and !isset($_SESSION['demande'])){
         $_SESSION['demande'] = $textToConvert;
@@ -28,6 +33,7 @@
         $elements = jsonToElements($json);
         $reponse = convert($elements);
         echo $reponse;
+        session_unset();
         exit;
     }
     else{
