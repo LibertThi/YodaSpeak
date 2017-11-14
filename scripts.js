@@ -1,78 +1,141 @@
+// shows an error in netbeans but it's ok: https://netbeans.org/bugzilla/show_bug.cgi?id=226477
+const INPUT_MAX_LENGTH = 140;
+
 // Display how many char. are available
 function updateCharCounter(){
-    var textarea = $("#textToConvert");
-    var maxLength = INPUT_MAX_LENGTH;
+    var textarea = $('#textToConvert');
     var currentLength = textarea.val().length;
 
-    if (currentLength >= maxLength){
-        $("#currentChar").css("color","red");
+    if (currentLength >= INPUT_MAX_LENGTH){
+        $('#currentChar').css('color','red');
     }
     else{
-        $("#currentChar").css("color","black");
+        $('#currentChar').css('color','#212529');
     }
     // update text
-    $("#currentChar").html(currentLength);
+    $('#currentChar').html(currentLength);
 
 
     // update submit button to allow click, or not
     if (currentLength === 0){
-        $("#convert").attr('disabled',true);
+        $('#convert').attr('disabled',true);
     }
     else{
-        $("#convert").removeAttr('disabled',false);
+        $('#convert').removeAttr('disabled',false);
     }
 }
-// Display a loading icon when submit button is clicked
-$("#convert").click(getResponse);
+// Bind the clic event to the handler
+$('#convert').click(getResponse);
 
 function getResponse(){
-    var param = $("#textToConvert").val();
-
-    $.get(
-        'fetchResponse.php?text=' + param,
-        handler,
-        'text'
-    );
- 
-    function handler(data){
-        if (data === '100'){
-            // no request
-        }
-        else if (data === '200'){
-            // no response yet
-            $("#loading").css('display',"block");
-            getResponse();
-        }
-        else {
-            $("#yodaResponse").html(data);
-            $("#yodaBlock").css('display',"block");
-            $("#loading").css('display',"none");
-        }
+    var param = $('#textToConvert').val();
+    var counter = 0;
+    if (param.length > INPUT_MAX_LENGTH){
+        param = param.substring(0, INPUT_MAX_LENGTH);
     }
-    //$("#loading").css('display',"block");
+    
+    GETrequest();
+    var tid = setInterval(GETrequest, 2000);
+    
+    function GETrequest(){
+        if (counter <= 3){
+            $.get(
+                'fetchResponse.php?text=' + param,
+                handler,
+                'text'
+            );
+            counter++;
+        }
+        else{
+            hideLoading();
+            displayYoda('Une perturbation dans la Force, à me connecter m\'empêche. Réessayer plus tard, tu dois.');
+            clearInterval(tid);
+            selectAll($('#textToConvert'));
+        }
+        
+        function handler(data){
+            if (data === '100'){
+                // no request
+                hideYoda();
+                $('#textToConvert').val('');
+                updateCharCounter();
+                clearInterval(tid);
+            }
+            else if (data === '200'){
+                // no response yet
+                displayLoading();
+                hideYoda();
+            }
+            else {
+                // show response
+                hideLoading();               
+                displayYoda(data);
+                clearInterval(tid);
+                selectAll($('#textToConvert'));
+            }
+        }
+    }    
 }
 
-// Refresh char counter on load
-$(document).ready(function(){
-    $("#charCounter").css("display","inline");
-    updateCharCounter();
-});
+function displayLoading(){
+    $('#loading').css('display','block');
+}
+
+function hideLoading(){
+    $('#loading').css('display','none');
+}
+
+function displayYoda(message){
+    randomizeImage();
+    $('#yodaResponse').html(message);
+    $('#yodaBlock').css('display','block');
+}
+
+function hideYoda(){
+    $('#yodaBlock').css('display','none');
+}
+
+function updateMaxLength(){
+    $('#textToConvert').attr('maxLength',INPUT_MAX_LENGTH);
+    $('#maxChar').html(INPUT_MAX_LENGTH);
+}
+
+function randomizeImage(){
+    function randomIntFromInterval(min,max){
+        return Math.floor(Math.random()*(max-min+1)+min);
+    }
+    var imageNumber = randomIntFromInterval(1, 4);
+    var src = 'images/yoda-0' + imageNumber + '.png';
+    $('#yoda').attr('src', src);
+}
+
+function displayCurrentYear(){
+    var d = new Date();
+    $('#currentYear').html(d.getFullYear());
+}
 
 // Catch "enter" to fire submit instead of new line
-$("#textToConvert").keypress(function (e) {
+$('#textToConvert').keypress(function (e) {
     if(e.which === 13 && !e.shiftKey) {
         e.preventDefault();
         // submit only if the button is enabled
-        if ($("#convert").attr('disabled') !== 'disabled'){
-            $("#convert").click();    
+        if ($('#convert').attr('disabled') !== 'disabled'){
+            $('#convert').click();    
         } 
     }
 });
 
 // Select all text in textarea (with a timeout to bypass the browser focus)
 function selectAll(textArea){
-	setTimeout(function(){textArea.select();},10);
+    setTimeout(function(){textArea.select();},10);
 }
 // Listen to input on textarea to update char counter
-var textarea = document.querySelector("#textToConvert");
-textarea.addEventListener("input", updateCharCounter);
+var textarea = document.querySelector('#textToConvert');
+textarea.addEventListener('input', updateCharCounter);
+
+// On page load...
+$(document).ready(function(){
+    updateMaxLength();
+    updateCharCounter();
+    displayCurrentYear();   
+});

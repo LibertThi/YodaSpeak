@@ -34,7 +34,7 @@ h1{
   text-align: center;
 }
 
-section{
+#section{
     background-color: rgba(220,220,220,0.5);
     -webkit-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.6);
     -moz-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.6);
