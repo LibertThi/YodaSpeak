@@ -412,7 +412,7 @@ function mb_ucfirst($str, $encoding = "UTF-8", $lower_str_end = false) {
  */
 function stringFromElements($elements, $isStart){
     $string = '';
-    $noSpaceChars = "/^(\.|\-|,|')$/";
+    $noSpaceChars = "/^.*?(\.|\-|,|')$/";
 
     foreach ($elements as $element){           
         $word = $element->getWord();

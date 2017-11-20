@@ -12,6 +12,7 @@
     
     $textToConvert = filter_input(INPUT_GET, 'text',
                     FILTER_SANITIZE_STRING);
+    $textToConvert = str_replace('"', '',  html_entity_decode($textToConvert));
     $textToConvert = trim($textToConvert);
     if (strlen($textToConvert) > INPUT_MAX_LENGTH){
             $textToConvert = mb_substr($textToConvert, 0, INPUT_MAX_LENGTH);
@@ -26,11 +27,24 @@
 
     if (isset($_SESSION['reponse'])){
         $json = $_SESSION['reponse'];
+        
+      //  echo 'reponse : ' . $json . '<br>';
         // convert it to an array of elements with pos
         $elements = jsonToElements($json);
+       /* echo 'elements : ';
+        print_r($elements);
+        echo '<br>';*/
         $reponse = convert($elements);
-        echo $reponse;
-        session_destroy();
+        
+        if (!empty($reponse)){
+            session_unset();
+            session_destroy();
+            echo $reponse;          
+            exit;
+        }
+        else{
+            echo '200'; 
+        }       
         exit;
     }
     else{

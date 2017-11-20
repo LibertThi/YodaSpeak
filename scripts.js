@@ -58,10 +58,10 @@ function getResponse(){
         function handler(data){
             if (data === '100'){
                 // no request
+                clearInterval(tid);
                 hideYoda();
                 $('#textToConvert').val('');
-                updateCharCounter();
-                clearInterval(tid);
+                updateCharCounter();               
             }
             else if (data === '200'){
                 // no response yet
@@ -70,9 +70,9 @@ function getResponse(){
             }
             else {
                 // show response
-                hideLoading();               
-                displayYoda(data);
                 clearInterval(tid);
+                hideLoading();               
+                displayYoda(data);               
                 enableButton();
                 selectAll($('#textToConvert'));
             }

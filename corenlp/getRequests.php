@@ -4,15 +4,16 @@
             . '%7B%22annotators%22%3A%20%22pos%22'
             . '%7D&pipelineLanguage=fr');
     // local testing
-    /*
+    //
     define('CORENLP_URL', 'http://192.168.154.130:9000/');   
     define('SCRIPT_DIR_URL', 'http://localhost/LibertT/YodaSpeak/scripts/');
-     */
-    // remote 
+    //
     
+    // remote  
+    /*
     define('CORENLP_URL', 'http://localhost:9000/');   
     define('SCRIPT_DIR_URL', 'http://yoda.pdf.s2dev.ch/scripts/');
-    
+    */
     require_once('corenlp.php');
     
     $json_encoded = file_get_contents(SCRIPT_DIR_URL . '/listRequests.php?uid=' . UID);
@@ -42,9 +43,4 @@
             print('CoreNLP unreachable');
         }
     } 
-    
-    function printLog($message){
-        $date = date('d.m.Y-G:i:s');
-        file_put_contents(LOG_PATH, $date . ':' . $message, FILE_APPEND);
-    }
 ?>
