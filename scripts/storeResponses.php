@@ -1,6 +1,6 @@
 <?php
     // access UID
-    define('UID', 'a1b2c3d4');
+    define('UID', '0082f2af-a4fe-43b2-8b44-2a87765aac72');
 
     if (!isset($_GET['uid']) or !isset($_GET['json'])){
         header("HTTP/1.1 403 Forbidden" );

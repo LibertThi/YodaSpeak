@@ -30,7 +30,7 @@
         $elements = jsonToElements($json);
         $reponse = convert($elements);
         echo $reponse;
-        session_unset();
+        session_destroy();
         exit;
     }
     else{

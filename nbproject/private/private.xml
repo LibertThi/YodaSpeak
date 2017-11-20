@@ -3,12 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/wamp/www/LibertT/YodaSpeak/fetchResponse.php</file>
+            <file>file:/C:/wamp/www/LibertT/YodaSpeak/scripts/storeResponses.php</file>
             <file>file:/C:/wamp/www/LibertT/YodaSpeak/scripts.js</file>
-            <file>file:/C:/wamp/www/LibertT/YodaSpeak/storeResponses.php</file>
+            <file>file:/C:/wamp/www/LibertT/YodaSpeak/scripts/fetchResponse.php</file>
             <file>file:/C:/wamp/www/LibertT/YodaSpeak/corenlp/getRequests.php</file>
-            <file>file:/C:/wamp/www/LibertT/YodaSpeak/listRequests.php</file>
-            <file>file:/C:/wamp/www/LibertT/YodaSpeak/index.php</file>
+            <file>file:/C:/wamp/www/LibertT/YodaSpeak/index.html</file>
+            <file>file:/C:/wamp/www/LibertT/YodaSpeak/scripts/listRequests.php</file>
         </group>
     </open-files>
 </project-private>

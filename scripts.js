@@ -18,16 +18,17 @@ function updateCharCounter(){
 
     // update submit button to allow click, or not
     if (currentLength === 0){
-        $('#convert').attr('disabled',true);
+        disableButton();
     }
     else{
-        $('#convert').removeAttr('disabled',false);
+        enableButton();
     }
 }
 // Bind the clic event to the handler
 $('#convert').click(getResponse);
 
 function getResponse(){
+    disableButton();
     var param = $('#textToConvert').val();
     var counter = 0;
     if (param.length > INPUT_MAX_LENGTH){
@@ -40,7 +41,7 @@ function getResponse(){
     function GETrequest(){
         if (counter <= 3){
             $.get(
-                'fetchResponse.php?text=' + param,
+                'scripts/fetchResponse.php?text=' + param,
                 handler,
                 'text'
             );
@@ -50,6 +51,7 @@ function getResponse(){
             hideLoading();
             displayYoda('Une perturbation dans la Force, à me connecter m\'empêche. Réessayer plus tard, tu dois.');
             clearInterval(tid);
+            enableButton();
             selectAll($('#textToConvert'));
         }
         
@@ -71,6 +73,7 @@ function getResponse(){
                 hideLoading();               
                 displayYoda(data);
                 clearInterval(tid);
+                enableButton();
                 selectAll($('#textToConvert'));
             }
         }
@@ -98,6 +101,14 @@ function hideYoda(){
 function updateMaxLength(){
     $('#textToConvert').attr('maxLength',INPUT_MAX_LENGTH);
     $('#maxChar').html(INPUT_MAX_LENGTH);
+}
+
+function enableButton(){
+    $('#convert').removeAttr('disabled',false);
+}
+
+function disableButton(){
+    $('#convert').attr('disabled',true);
 }
 
 function randomizeImage(){
