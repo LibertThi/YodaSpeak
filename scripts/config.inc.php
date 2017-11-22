@@ -1,6 +1,8 @@
 <?php
     // set to true to display some debugging elements
     define('DEBUG', false);
+    
+    // NO LONGER REQUIRED FOR THE NEW VERSION !!!!
     // Maximum length of input
     define('INPUT_MAX_LENGTH', 140);
     // Base URL of the server (with port)

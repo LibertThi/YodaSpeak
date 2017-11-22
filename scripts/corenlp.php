@@ -1,6 +1,5 @@
 <?php       
-    class corenlp {
-    
+    class corenlp {   
         private $SERVER_URL;
         private $PROPERTIES;
 

@@ -1,5 +1,11 @@
 <?php 
 
+/** 
+ * Transforms a json flux into an array of Element objects
+ * 
+ * @param type $json
+ * @return \element
+ */
 function jsonToElements($json){
     // decode the json first
     $json = html_entity_decode($json, ENT_QUOTES, "UTF-8");
@@ -12,7 +18,6 @@ function jsonToElements($json){
     if (!isset($jsonToArray['sentences'])){
         return null;
     }
-
     foreach ($jsonToArray['sentences'] as $sentence){
         $numSentence = $sentence['index'];
         foreach ($sentence['tokens'] as $tokens){                    
@@ -35,16 +40,14 @@ function jsonToElements($json){
  */
 function convert($elements){
     $result = '';
-
     // separate sentences to treat them one by one
-    $sentences = separateSentences($elements);
-
-    foreach ($sentences as $sentence){     
+    $sentences = separateSentences($elements);    
+    foreach ($sentences as $sentence){   
+        // Put a space if it isn't the first sentence
         if ($result != ''){
             $result .= ' ';
         }
-
-        // use the appropriate method to treat the sentence
+        // Use the appropriate method to treat the sentence
         // depending of its type
         $sentenceType = getSentenceType($sentence);
         switch ($sentenceType){
@@ -68,7 +71,6 @@ function convert($elements){
                 break;
         }       
     }
-
     return $result;
 }
 
@@ -176,7 +178,7 @@ function convertSVO($elements){
         if ($pos == 'V' and !$verbFound){
             $verbFound = true;
         }
-        // if an infinitive verb is found
+        // If an infinitive verb is found
         elseif ($pos == 'VINF'){               
             // check if the previous word is a pronoun
             $prevPos = $elements[$i - 1]->getPos();
@@ -187,24 +189,20 @@ function convertSVO($elements){
                     or $prevPos == 'VPP'){
                 $start[] = $element;
             }
-
             // keep it for the end array otherwise
             else{
                 $vinfAlone = $element;                
             }
-
         }
         // Put what is after the verb in the "start" array
         elseif($pos != 'PUNC' and $verbFound){
             $start[] = $element;
         }          
     }
-
     //------------------------------------     
     // Reform sentence
     //------------------------------------      
     $sentence = '';
-
     // if there is no object, either place the infinitive verb before
     // or don't change anything
     if ($start == null){
@@ -219,19 +217,15 @@ function convertSVO($elements){
     elseif ($vinfAlone != null){
         array_unshift($end, $vinfAlone);
     }
-
     // Add the start array
     $sentence .= stringFromElements($start, true);
-
     // Add the end if it exists
     if ($end != null){
         $sentence .= ', ';              
         $sentence .= stringFromElements($end, false);
     }
-
     // Put the end punctuation
-    putCorrectPunct($sentence, $elements);
-
+    putCorrectPunct($sentence, $elements);    
     return $sentence;
 }
 
@@ -246,10 +240,8 @@ function convertImperative($elements){
     if ($elements == null){
         return '';
     }
-
     $start = array();
     $imperativeVerb = '';
-
     //---------------------------------
     // Sort elements
     //---------------------------------
@@ -264,12 +256,10 @@ function convertImperative($elements){
             $start[] = $element;
         }
     }
-
     //---------------------------------
     // Reform sentence
     //---------------------------------
     $sentence = '';      
-
     // Put the start
     $sentence .= stringFromElements($start, true);       
     // Separate the start and the imperative with a comma 
@@ -278,7 +268,6 @@ function convertImperative($elements){
     $sentence .= mb_strtolower($imperativeVerb) . " ";         
     // Put the end punctuation
     putCorrectPunct($sentence, $elements);
-
     return $sentence;
 }
 
@@ -291,7 +280,6 @@ function convertImperative($elements){
  */
 function putCorrectPunct(&$sentence, $originalElements){      
     $sentence = rtrim($sentence);
-
     $lastPunc = $originalElements[count($originalElements)-1];   
     if ($lastPunc->getPos() == 'PUNC'){
         // put space before if it's not a dot
@@ -339,14 +327,6 @@ function convertComposed($elements){
             $secondSentence[] = $element;
         }         
     }    
-
-    if (DEBUG){
-        echo 'First sentence';
-        var_dump($firstSentence);
-        echo 'Second sentence';
-        var_dump($secondSentence);
-    }
-
     // Treat each sentence
     $fullSentence = '';             
     // remove punct at the end of the first sentence  
@@ -374,6 +354,7 @@ function convertComposed($elements){
     return $fullSentence;
 }
 
+// NOT IMPLEMENTED YET
 function convertInterrogative($sentence){
     return stringFromElements($sentence, true);
 }
