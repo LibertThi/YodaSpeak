@@ -1,4 +1,4 @@
-// shows an error in netbeans but it's ok: https://netbeans.org/bugzilla/show_bug.cgi?id=226477
+// shows an error in netbeans 8.0.2 but it's ok: https://netbeans.org/bugzilla/show_bug.cgi?id=226477
 const INPUT_MAX_LENGTH = 140;
 
 // Updates the display of how many char. are available
@@ -36,19 +36,21 @@ function submitRequest(){
         param = param.substring(0, INPUT_MAX_LENGTH);
     }
     
-    GETrequest();
+    POSTrequest();
     // repeat GET request every 2 seconds
     // until we get a response or we repeat it a certain amount of time
-    var tid = setInterval(GETrequest, 2000);
+    var tid = setInterval(POSTrequest, 2000);
     
     // Perform a GET request on a local script
     // which looks for a response in the session file
-    function GETrequest(){
+    function POSTrequest(){
         if (counter <= 3){
-            $.get(
-                'scripts/fetchResponse.php?text=' + param,
-                handler,
-                'text'
+            $.post(
+                'scripts/fetchResponse.php',
+            {
+                text: param
+            },
+                handler
             );
             counter++;
         }

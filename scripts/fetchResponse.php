@@ -2,16 +2,17 @@
     session_start();
     /*require_once('config.inc.php'); 
     require_once('corenlp.php');*/
+    define ('INPUT_MAX_LENGTH', 140);
     require_once('convertToYodaspeak.php');
     require_once('element.php');   
     
     // returns "empty request" code
-    if (!isset($_GET['text'])){
+    if (!isset($_POST['text'])){
         echo '100';
         exit;
     }
     // Sanitize input
-    $textToConvert = filter_input(INPUT_GET, 'text',
+    $textToConvert = filter_input(INPUT_POST, 'text',
                     FILTER_SANITIZE_STRING);
     $textToConvert = str_replace('"', '',  html_entity_decode($textToConvert));
     $textToConvert = trim($textToConvert);

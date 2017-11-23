@@ -169,7 +169,12 @@ function convertSVO($elements){
     for ($i = 0; $i < count($elements); $i++){
         $element = $elements[$i];
         $pos = $element->getPos();
-
+        if ($i > 0){
+            $prevPos = $elements[$i - 1]->getPos();
+        }
+        else{
+            $prevPos = null;
+        }
         // Put what is before the verb in the "end" array
         if (!$verbFound and $pos != 'PUNC'){             
            $end[] = $element;
@@ -180,8 +185,7 @@ function convertSVO($elements){
         }
         // If an infinitive verb is found
         elseif ($pos == 'VINF'){               
-            // check if the previous word is a pronoun
-            $prevPos = $elements[$i - 1]->getPos();
+            // check if the previous word is a pronoun           
             // move the VINF to the start with it's pronoun or "VPP"
             if ($prevPos == 'CLS'
                     or $prevPos == 'CLO'
@@ -194,10 +198,19 @@ function convertSVO($elements){
                 $vinfAlone = $element;                
             }
         }
+        elseif($pos == 'CLS' and $prevPos == 'V'){
+            $word = $element->getWord();
+            if (preg_match("/^-$/", substr($word, 0, 1))){
+                $end[] = $element;
+            }
+            else{
+                $start[] = $element;
+            }            
+        }
         // Put what is after the verb in the "start" array
         elseif($pos != 'PUNC' and $verbFound){
             $start[] = $element;
-        }          
+        }        
     }
     //------------------------------------     
     // Reform sentence
@@ -355,8 +368,9 @@ function convertComposed($elements){
 }
 
 // NOT IMPLEMENTED YET
+// works quite well with the standard conversion...
 function convertInterrogative($sentence){
-    return stringFromElements($sentence, true);
+    return convertSVO($sentence);
 }
 
 /**
@@ -404,9 +418,9 @@ function stringFromElements($elements, $isStart){
         }        
         else{
             // If the first char is a "no space char", remove last space
-            if (preg_match($noSpaceChars, substr($word, 0, 1))){
+            if (preg_match($noSpaceChars, substr($word, 0, 1)) or $word == ')'){
                 $string = rtrim($string);
-            }
+            }           
             
             // Add word with lowercase if it isn't a named person
             if ($element->getPos() == 'NPP'){
@@ -417,7 +431,7 @@ function stringFromElements($elements, $isStart){
             }  
         }         
         // Put a space, but check for "no space" char. first
-        if (!preg_match($noSpaceChars, $word)){        
+        if (!preg_match($noSpaceChars, $word) and ($word != '(')){        
             $string .= ' ';
         }  
     }

@@ -1,5 +1,6 @@
 <?php
     // access UID
+    // must match the one in /opt/yodaspeak/config.inc.php on corenlp server
     define('UID', '0082f2af-a4fe-43b2-8b44-2a87765aac72');
     
     if (!isset($_GET['uid'])){
